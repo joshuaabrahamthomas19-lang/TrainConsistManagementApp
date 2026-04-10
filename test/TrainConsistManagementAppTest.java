@@ -1,41 +1,39 @@
 import org.junit.jupiter.api.Test;
+import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TrainConsistManagementAppTest {
 
     @Test
-    void testRegex_ValidTrainID() {
-        assertTrue(TrainConsistManagementApp.validateInput("TRN-1234", "TRN-\\d{4}"));
+    void testSafety_AllBogiesValid() {
+        List<TrainConsistManagementApp.GoodsBogie> bogies = Arrays.asList(
+                new TrainConsistManagementApp.GoodsBogie("Cylindrical", "Petroleum"),
+                new TrainConsistManagementApp.GoodsBogie("Open", "Coal")
+        );
+
+        boolean isSafe = bogies.stream().allMatch(b ->
+                !b.type.equals("Cylindrical") || b.cargo.equals("Petroleum"));
+
+        assertTrue(isSafe); //
     }
 
     @Test
-    void testRegex_InvalidTrainIDFormat() {
-        // Test wrong prefix, letters in digits, and wrong structure
-        assertFalse(TrainConsistManagementApp.validateInput("TRAIN-1234", "TRN-\\d{4}"));
-        assertFalse(TrainConsistManagementApp.validateInput("TRN-123A", "TRN-\\d{4}"));
+    void testSafety_CylindricalWithInvalidCargo() {
+        List<TrainConsistManagementApp.GoodsBogie> bogies = Arrays.asList(
+                new TrainConsistManagementApp.GoodsBogie("Cylindrical", "Coal")
+        );
+
+        boolean isSafe = bogies.stream().allMatch(b ->
+                !b.type.equals("Cylindrical") || b.cargo.equals("Petroleum"));
+
+        assertFalse(isSafe); //
     }
 
     @Test
-    void testRegex_ValidCargoCode() {
-        assertTrue(TrainConsistManagementApp.validateInput("PET-AB", "PET-[A-Z]{2}"));
-    }
+    void testSafety_EmptyBogieList() {
+        List<TrainConsistManagementApp.GoodsBogie> emptyList = new ArrayList<>();
+        boolean isSafe = emptyList.stream().allMatch(b -> true);
 
-    @Test
-    void testRegex_InvalidCargoCodeFormat() {
-        // Test lowercase and wrong number of letters
-        assertFalse(TrainConsistManagementApp.validateInput("PET-ab", "PET-[A-Z]{2}"));
-        assertFalse(TrainConsistManagementApp.validateInput("PET-ABC", "PET-[A-Z]{2}"));
-    }
-
-    @Test
-    void testRegex_TrainIDDigitLengthValidation() {
-        // Exactly 4 digits required
-        assertFalse(TrainConsistManagementApp.validateInput("TRN-123", "TRN-\\d{4}"));
-        assertFalse(TrainConsistManagementApp.validateInput("TRN-12345", "TRN-\\d{4}"));
-    }
-
-    @Test
-    void testRegex_EmptyInputHandling() {
-        assertFalse(TrainConsistManagementApp.validateInput("", "TRN-\\d{4}"));
+        assertTrue(isSafe); //
     }
 }

@@ -1,52 +1,55 @@
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
-/**
- * UC11: Validate Train ID and Cargo Codes (Regex)
- * Description: Uses Regular Expressions to enforce strict format rules.
- */
 public class TrainConsistManagementApp {
+
+        // Model for Goods Bogies as per UC12 requirements
+        static class GoodsBogie {
+                String type;
+                String cargo;
+
+                GoodsBogie(String type, String cargo) {
+                        this.type = type;
+                        this.cargo = cargo;
+                }
+
+                @Override
+                public String toString() {
+                        return type + " -> " + cargo;
+                }
+        }
 
         public static void main(String[] args) {
                 System.out.println("==========================================");
-                System.out.println(" UC11 - Validate Train ID and Cargo Code ");
+                System.out.println(" UC12 - Safety Compliance Check for Goods Bogies ");
                 System.out.println("==========================================\n");
 
-                Scanner scanner = new Scanner(System.in);
+                // 1. Create a list of goods bogies
+                List<GoodsBogie> goodsBogies = new ArrayList<>();
+                goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
+                goodsBogies.add(new GoodsBogie("Open", "Coal"));
+                goodsBogies.add(new GoodsBogie("Box", "Grain"));
+                goodsBogies.add(new GoodsBogie("Cylindrical", "Coal")); // This violates the safety rule
 
-                // 1. Accept user input
-                System.out.print("Enter Train ID (Format: TRN-1234): ");
-                String trainId = scanner.nextLine();
+                System.out.println("Goods Bogies in Train:");
+                goodsBogies.forEach(System.out::println);
 
-                System.out.print("Enter Cargo Code (Format: PET-AB): ");
-                String cargoCode = scanner.nextLine();
+                // 2. APPLY SAFETY VALIDATION RULE
+                // Rule: If type is "Cylindrical", cargo must be "Petroleum"
+                boolean isSafe = goodsBogies.stream().allMatch(b -> {
+                        if (b.type.equals("Cylindrical")) {
+                                return b.cargo.equals("Petroleum");
+                        }
+                        return true; // Other types are considered safe regardless of cargo here
+                });
 
-                // 2. DEFINE REGEX RULES
-                // TRN- followed by exactly 4 digits
-                String trainIdRegex = "TRN-\\d{4}";
-                // PET- followed by exactly 2 uppercase letters
-                String cargoCodeRegex = "PET-[A-Z]{2}";
+                // 3. DISPLAY RESULTS
+                System.out.println("\nSafety Compliance Status: " + isSafe);
+                if (isSafe) {
+                        System.out.println("Train formation is SAFE.");
+                } else {
+                        System.out.println("Train formation is NOT SAFE.");
+                }
 
-                // 3. APPLY VALIDATION
-                boolean isTrainIdValid = validateInput(trainId, trainIdRegex);
-                boolean isCargoCodeValid = validateInput(cargoCode, cargoCodeRegex);
-
-                // 4. DISPLAY RESULTS
-                System.out.println("\nValidation Results:");
-                System.out.println("Train ID Valid: " + isTrainIdValid);
-                System.out.println("Cargo Code Valid: " + isCargoCodeValid);
-
-                System.out.println("\nUC11 validation completed...");
-                scanner.close();
-        }
-
-        /**
-         * Utility method to compile pattern and match input
-         */
-        public static boolean validateInput(String input, String regex) {
-                Pattern pattern = Pattern.compile(regex);
-                Matcher matcher = pattern.matcher(input);
-                return matcher.matches();
+                System.out.println("\nUC12 safety validation completed...");
         }
 }
