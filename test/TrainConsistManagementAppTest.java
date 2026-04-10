@@ -1,72 +1,46 @@
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TrainConsistManagementAppTest {
 
-    private List<TrainConsistManagementApp.Bogie> bogieList;
+    @Test
+    void testGrouping_BogiesGroupedByType() {
+        List<TrainConsistManagementApp.Bogie> bogies = new ArrayList<>();
+        bogies.add(new TrainConsistManagementApp.Bogie("Sleeper", 72));
+        bogies.add(new TrainConsistManagementApp.Bogie("Sleeper", 70));
+        bogies.add(new TrainConsistManagementApp.Bogie("AC Chair", 56));
 
-    @BeforeEach
-    void setUp() {
-        bogieList = new ArrayList<>();
-        bogieList.add(new TrainConsistManagementApp.Bogie("Sleeper", 72));
-        bogieList.add(new TrainConsistManagementApp.Bogie("AC Chair", 56));
-        bogieList.add(new TrainConsistManagementApp.Bogie("First Class", 24));
-        bogieList.add(new TrainConsistManagementApp.Bogie("General", 90));
+        Map<String, List<TrainConsistManagementApp.Bogie>> result = bogies.stream()
+                .collect(Collectors.groupingBy(b -> b.name));
+
+        // Verify keys exist
+        assertTrue(result.containsKey("Sleeper"));
+        assertTrue(result.containsKey("AC Chair"));
+
+        // Verify group sizes
+        assertEquals(2, result.get("Sleeper").size());
+        assertEquals(1, result.get("AC Chair").size());
     }
 
     @Test
-    void testFilter_CapacityGreaterThanThreshold() {
-        List<TrainConsistManagementApp.Bogie> result = bogieList.stream()
-                .filter(b -> b.capacity > 70)
-                .collect(Collectors.toList());
-
-        // Sleeper (72) and General (90) should be present
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    void testFilter_CapacityEqualToThreshold() {
-        // Checking threshold exactly at 72
-        List<TrainConsistManagementApp.Bogie> result = bogieList.stream()
-                .filter(b -> b.capacity > 72)
-                .collect(Collectors.toList());
-
-        // Only General (90) is > 72. Sleeper (72) is excluded.
-        assertEquals(1, result.size());
-        assertEquals("General", result.get(0).name);
-    }
-
-    @Test
-    void testFilter_NoBogiesMatching() {
-        List<TrainConsistManagementApp.Bogie> result = bogieList.stream()
-                .filter(b -> b.capacity > 100)
-                .collect(Collectors.toList());
-
-        assertTrue(result.isEmpty(), "List should be empty for impossible threshold");
-    }
-
-    @Test
-    void testFilter_OriginalListUnchanged() {
-        int initialSize = bogieList.size();
-
-        bogieList.stream()
-                .filter(b -> b.capacity > 60)
-                .collect(Collectors.toList());
-
-        assertEquals(initialSize, bogieList.size(), "Stream should not modify the original list");
-    }
-
-    @Test
-    void testFilter_EmptyBogieList() {
+    void testGrouping_EmptyBogieList() {
         List<TrainConsistManagementApp.Bogie> emptyList = new ArrayList<>();
-        List<TrainConsistManagementApp.Bogie> result = emptyList.stream()
-                .filter(b -> b.capacity > 10)
-                .collect(Collectors.toList());
+        Map<String, List<TrainConsistManagementApp.Bogie>> result = emptyList.stream()
+                .collect(Collectors.groupingBy(b -> b.name));
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGrouping_OriginalListUnchanged() {
+        List<TrainConsistManagementApp.Bogie> bogies = new ArrayList<>();
+        bogies.add(new TrainConsistManagementApp.Bogie("Sleeper", 72));
+
+        int initialSize = bogies.size();
+        bogies.stream().collect(Collectors.groupingBy(b -> b.name));
+
+        assertEquals(initialSize, bogies.size(), "Original list should not be modified");
     }
 }
